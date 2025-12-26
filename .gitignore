@@ -1,0 +1,36 @@
+# Dependencies
+node_modules/
+.venv/
+
+# Build output
+dist/
+
+# Test coverage
+coverage/
+.vitest/
+
+# Logs
+*.log
+npm-debug.log*
+pnpm-debug.log*
+
+# Environment
+.env
+.env.*
+!.env.example
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# Project-specific local files
+.internal/
+.benchmarks/
+.claude
+tmp/
+
+# Vale styles (synced via vale sync)
+.vale/
+
+# SBOM files
+*.cdx.json

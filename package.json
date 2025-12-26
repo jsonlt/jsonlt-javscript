@@ -1,0 +1,56 @@
+{
+  "name": "@jsonlt/jsonlt",
+  "version": "0.0.0",
+  "description": "A library for using JSON Lines Table (JSONLT) files as lightweight databases",
+  "type": "module",
+  "main": "./dist/index.js",
+  "module": "./dist/index.js",
+  "types": "./dist/index.d.ts",
+  "exports": {
+    ".": {
+      "import": {
+        "types": "./dist/index.d.ts",
+        "default": "./dist/index.js"
+      }
+    },
+    "./package.json": "./package.json"
+  },
+  "files": [
+    "dist",
+    "LICENSE",
+    "README.md"
+  ],
+  "sideEffects": false,
+  "engines": {
+    "node": ">=20.0.0"
+  },
+  "packageManager": "pnpm@10.19.0",
+  "keywords": [
+    "jsonl",
+    "json-lines",
+    "jsonlt",
+    "database",
+    "append-only",
+    "key-value"
+  ],
+  "author": "Tony Burns",
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/jsonlt/jsonlt-javascript.git"
+  },
+  "bugs": {
+    "url": "https://github.com/jsonlt/jsonlt-javascript/issues"
+  },
+  "homepage": "https://jsonlt.org",
+  "devDependencies": {
+    "@biomejs/biome": "2.3.10",
+    "@types/node": "^20.17.12",
+    "@vitest/coverage-v8": "^3.2.3",
+    "fast-check": "^4.1.1",
+    "markdownlint-cli2": "0.20.0",
+    "tsup": "^8.5.0",
+    "typescript": "^5.8.3",
+    "vitest": "^3.2.3"
+  }
+}

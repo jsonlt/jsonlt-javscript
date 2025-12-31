@@ -11,6 +11,16 @@ export class JsonltError extends Error {
 
 /**
  * Error thrown when parsing JSONL content fails.
+ *
+ * A parse error occurs when reading a JSONLT file due to malformed content:
+ * - Invalid JSON syntax
+ * - Invalid UTF-8 encoding
+ * - Empty lines (whitespace-only)
+ * - Duplicate keys in JSON objects
+ * - Invalid header structure
+ * - Invalid tombstone ($deleted with non-boolean value)
+ * - Header appearing after first line
+ * - Unsupported version number
  */
 export class ParseError extends JsonltError {
   readonly line: number;
@@ -27,20 +37,37 @@ export class ParseError extends JsonltError {
 }
 
 /**
- * Error thrown when a key operation fails (e.g., key not found, duplicate key).
+ * Error thrown when a key operation fails.
+ *
+ * A key error occurs when a key or key specifier is invalid or inconsistent:
+ * - Missing key field in record
+ * - Invalid key type (null, boolean, object, array when not tuple)
+ * - Numeric key with fractional component
+ * - Numeric key outside safe integer range (±2^53-1)
+ * - Empty key specifier
+ * - Duplicate field names in key specifier
+ * - Key specifier mismatch between header and caller
  */
 export class KeyError extends JsonltError {
-  readonly key: string;
+  readonly key: unknown;
+  readonly field: string | undefined;
 
-  constructor(message: string, key: string) {
-    super(`${message}: "${key}"`);
+  constructor(message: string, key?: unknown, field?: string) {
+    const keyStr = key !== undefined ? `: ${JSON.stringify(key)}` : "";
+    const fieldStr = field !== undefined ? ` (field: "${field}")` : "";
+    super(`Key error${fieldStr}${keyStr}: ${message}`);
     this.name = "KeyError";
     this.key = key;
+    this.field = field;
   }
 }
 
 /**
  * Error thrown when record validation fails.
+ *
+ * A validation error occurs when a record violates JSONLT constraints:
+ * - Record contains $-prefixed fields (reserved for JSONLT)
+ * - Record is not a JSON object
  */
 export class ValidationError extends JsonltError {
   readonly field: string | undefined;
@@ -53,5 +80,98 @@ export class ValidationError extends JsonltError {
     );
     this.name = "ValidationError";
     this.field = field;
+  }
+}
+
+/**
+ * Error thrown when file system operations fail.
+ *
+ * An IO error occurs during file system operations:
+ * - File cannot be read due to permissions or I/O errors
+ * - File cannot be written due to permissions or I/O errors
+ * - File does not exist and create mode is not enabled
+ */
+export class IOError extends JsonltError {
+  readonly path: string;
+  override readonly cause: Error | undefined;
+
+  constructor(message: string, path: string, cause?: Error) {
+    super(`IO error for "${path}": ${message}`);
+    this.name = "IOError";
+    this.path = path;
+    this.cause = cause;
+  }
+}
+
+/**
+ * Error thrown when file locking fails.
+ *
+ * A lock error occurs when file locking operations fail:
+ * - Lock acquisition times out
+ * - Lock cannot be acquired due to contention
+ */
+export class LockError extends JsonltError {
+  readonly path: string;
+  readonly timeout: number | undefined;
+
+  constructor(message: string, path: string, timeout?: number) {
+    const timeoutStr = timeout !== undefined ? ` (timeout: ${timeout}ms)` : "";
+    super(`Lock error for "${path}"${timeoutStr}: ${message}`);
+    this.name = "LockError";
+    this.path = path;
+    this.timeout = timeout;
+  }
+}
+
+/**
+ * Error thrown when content exceeds implementation limits.
+ *
+ * A limit error occurs when:
+ * - Key length exceeds maximum (1024 bytes)
+ * - Record size exceeds maximum (1 MiB)
+ * - Nesting depth exceeds maximum (64 levels)
+ * - Tuple key exceeds maximum elements (16)
+ */
+export class LimitError extends JsonltError {
+  readonly limitName: string;
+  readonly actual: number;
+  readonly maximum: number;
+
+  constructor(limitName: string, actual: number, maximum: number) {
+    super(`Limit exceeded: ${limitName} is ${actual}, maximum is ${maximum}`);
+    this.name = "LimitError";
+    this.limitName = limitName;
+    this.actual = actual;
+    this.maximum = maximum;
+  }
+}
+
+/**
+ * Error thrown when a transaction operation fails.
+ *
+ * A conflict error occurs when a transaction commit detects that another
+ * process has modified a key that the transaction also modified.
+ */
+export class ConflictError extends JsonltError {
+  readonly keys: unknown[];
+
+  constructor(message: string, keys: unknown[]) {
+    super(`Conflict error: ${message}`);
+    this.name = "ConflictError";
+    this.keys = keys;
+  }
+}
+
+/**
+ * Error thrown for general transaction errors.
+ *
+ * A transaction error occurs when:
+ * - A nested transaction is attempted
+ * - A commit fails due to conflict
+ */
+export class TransactionError extends JsonltError {
+  constructor(message: string) {
+    super(`Transaction error: ${message}`);
+    this.name = "TransactionError";
   }
 }

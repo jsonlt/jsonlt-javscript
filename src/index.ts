@@ -19,7 +19,7 @@ export {
 export {
   ConflictError,
   IOError,
-  JsonltError,
+  JSONLTError,
   KeyError,
   LimitError,
   LockError,

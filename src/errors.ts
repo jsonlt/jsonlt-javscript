@@ -1,10 +1,10 @@
 /**
  * Base error class for all JSONLT errors.
  */
-export class JsonltError extends Error {
+export class JSONLTError extends Error {
   constructor(message: string) {
     super(message);
-    this.name = "JsonltError";
+    this.name = "JSONLTError";
     Object.setPrototypeOf(this, new.target.prototype);
   }
 }
@@ -22,7 +22,7 @@ export class JsonltError extends Error {
  * - Header appearing after first line
  * - Unsupported version number
  */
-export class ParseError extends JsonltError {
+export class ParseError extends JSONLTError {
   readonly line: number;
   readonly column: number | undefined;
 
@@ -48,7 +48,7 @@ export class ParseError extends JsonltError {
  * - Duplicate field names in key specifier
  * - Key specifier mismatch between header and caller
  */
-export class KeyError extends JsonltError {
+export class KeyError extends JSONLTError {
   readonly key: unknown;
   readonly field: string | undefined;
 
@@ -69,7 +69,7 @@ export class KeyError extends JsonltError {
  * - Record contains $-prefixed fields (reserved for JSONLT)
  * - Record is not a JSON object
  */
-export class ValidationError extends JsonltError {
+export class ValidationError extends JSONLTError {
   readonly field: string | undefined;
 
   constructor(message: string, field?: string) {
@@ -91,7 +91,7 @@ export class ValidationError extends JsonltError {
  * - File cannot be written due to permissions or I/O errors
  * - File does not exist and create mode is not enabled
  */
-export class IOError extends JsonltError {
+export class IOError extends JSONLTError {
   readonly path: string;
   override readonly cause: Error | undefined;
 
@@ -110,7 +110,7 @@ export class IOError extends JsonltError {
  * - Lock acquisition times out
  * - Lock cannot be acquired due to contention
  */
-export class LockError extends JsonltError {
+export class LockError extends JSONLTError {
   readonly path: string;
   readonly timeout: number | undefined;
 
@@ -132,7 +132,7 @@ export class LockError extends JsonltError {
  * - Nesting depth exceeds maximum (64 levels)
  * - Tuple key exceeds maximum elements (16)
  */
-export class LimitError extends JsonltError {
+export class LimitError extends JSONLTError {
   readonly limitName: string;
   readonly actual: number;
   readonly maximum: number;
@@ -152,7 +152,7 @@ export class LimitError extends JsonltError {
  * A conflict error occurs when a transaction commit detects that another
  * process has modified a key that the transaction also modified.
  */
-export class ConflictError extends JsonltError {
+export class ConflictError extends JSONLTError {
   readonly keys: unknown[];
 
   constructor(message: string, keys: unknown[]) {
@@ -169,7 +169,7 @@ export class ConflictError extends JsonltError {
  * - A nested transaction is attempted
  * - A commit fails due to conflict
  */
-export class TransactionError extends JsonltError {
+export class TransactionError extends JSONLTError {
   constructor(message: string) {
     super(`Transaction error: ${message}`);
     this.name = "TransactionError";
